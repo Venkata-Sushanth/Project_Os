@@ -1,0 +1,26 @@
+"use client";
+import Link from "next/link";
+import {useRef,useState} from "react";
+import {Search,Menu,X,ChevronDown,ChevronRight,Command,ArrowUpRight} from "lucide-react";
+import {navigation,organizationName,previewOrganizations,workspaceHref,type PageInfo} from "@/lib/navigation";
+import {Brand,Icon} from "./ui";
+type Props={tenantId:string;page:PageInfo;children:React.ReactNode};
+export function Shell({tenantId,page,children}:Props){
+ const drawer=useRef<HTMLDialogElement>(null);const search=useRef<HTMLDialogElement>(null);
+ const [query,setQuery]=useState("");
+ const groups=["Workspace","Intelligence","Governance","Organization"];
+ function closeMenus(){drawer.current?.close();search.current?.close();}
+ const links=(mobile=false)=><nav aria-label={mobile?"Mobile workspace navigation":"Workspace navigation"}>{groups.map(group=><div className="nav-group" key={group}><p className="nav-label">{group}</p>{navigation.filter(p=>p.group===group).map(item=><Link onClick={closeMenus} key={item.path} href={workspaceHref(tenantId,item.path)} aria-current={page.title===item.title?"page":undefined} className={"nav-item "+(page.title===item.title?"active":"")}><Icon name={item.icon}/><span>{item.title}</span>{item.title==="AI Insights"?<span className="nav-ai">AI</span>:null}</Link>)}</div>)}</nav>;
+ return <div className="app-shell"><a className="skip-link" href="#main-content">Skip to content</a>
+ <aside className="sidebar"><Link className="brand-link" href={workspaceHref(tenantId)} aria-label="ProjectOS overview"><Brand/></Link><div className="workspace-label"><span className="workspace-dot"/>FRONTEND PREVIEW</div>{links()}<div className="sidebar-note"><Icon name="approvals" size={18}/><div><strong>Built for thoughtful teams</strong><p>Clarity. Control. Confidence.</p></div></div></aside>
+ <div className="app-body"><header className="topbar"><button className="icon-button mobile-menu" aria-label="Open navigation" onClick={()=>drawer.current?.showModal()}><Menu size={21}/></button><div className="breadcrumb"><span>Workspace</span><ChevronRight size={14} aria-hidden="true"/><strong>{page.title}</strong></div><div className="top-actions">
+ <details className="dropdown organization-menu"><summary><span className="org-avatar">{previewOrganizations.find(o=>o.id===tenantId)?.initials??"OP"}</span><span className="org-name">{organizationName(tenantId)}</span><ChevronDown size={14} aria-hidden="true"/></summary><div className="dropdown-panel"><p className="menu-label">Presentation contexts · no live tenancy</p>{previewOrganizations.map(org=><Link href={workspaceHref(org.id)} key={org.id} aria-current={org.id===tenantId?"true":undefined}>{org.name}{org.id===tenantId?<span className="selected-dot" aria-label="Selected"/>:null}</Link>)}<Link href="/organizations">View organizations <ArrowUpRight size={14}/></Link></div></details>
+ <span className="top-divider"/>
+ <button className="icon-button" aria-label="Find a page" onClick={()=>search.current?.showModal()}><Search size={19}/></button>
+ <Link className="icon-button" aria-label="Notifications" href={workspaceHref(tenantId,"notifications")}><Icon name="notifications" size={20}/></Link>
+ <details className="dropdown profile-menu"><summary aria-label="Open preview profile menu"><span className="avatar">P</span></summary><div className="dropdown-panel"><strong>Preview visitor</strong><p className="menu-label">No account is signed in.</p><Link href="/login">Sign-in preview <ArrowUpRight size={14}/></Link><Link href={workspaceHref(tenantId,"settings")}>Organization settings</Link></div></details>
+ </div></header><main id="main-content" tabIndex={-1} className="main-content">{children}<footer className="page-footer"><span>ProjectOS · A clearer way to work</span><span>Phase 1 / Frontend foundation</span></footer></main></div>
+ <dialog ref={drawer} className="mobile-drawer" aria-labelledby="navigation-title"><div className="dialog-head"><h2 id="navigation-title">Workspace navigation</h2><button className="icon-button" aria-label="Close navigation" onClick={()=>drawer.current?.close()}><X size={20}/></button></div>{links(true)}</dialog>
+ <dialog ref={search} className="search-dialog" aria-labelledby="search-title"><div className="dialog-head"><h2 id="search-title"><Command size={18} aria-hidden="true"/> Find a page</h2><button className="icon-button" aria-label="Close page finder" onClick={()=>search.current?.close()}><X size={19}/></button></div><label htmlFor="page-query" className="field-label">Search navigation destinations</label><input id="page-query" type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder="Try projects, policies, or team…" className="input"/><p className="menu-label">Navigation only. Project data search comes later.</p><div className="search-results">{navigation.filter(p=>p.title.toLowerCase().includes(query.toLowerCase())).map(p=><Link key={p.path} href={workspaceHref(tenantId,p.path)} onClick={closeMenus}><Icon name={p.icon}/>{p.title}<ChevronRight size={16}/></Link>)}{navigation.filter(p=>p.title.toLowerCase().includes(query.toLowerCase())).length===0?<p className="empty-search" role="status">No pages match. Try another name.</p>:null}</div></dialog>
+ </div>;
+}

@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorPage({reset}: {error: Error & {digest?:string};reset:()=>void}) {return <main className="standalone"><div className="loading-card"><span className="eyebrow">PROJECTOS</span><h1>Something interrupted this page.</h1><p>Your preview has no stored project data to lose. Try loading the page again.</p><button className="button primary" onClick={reset}>Try again</button></div></main>;}

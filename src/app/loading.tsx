@@ -1,0 +1,1 @@
+export default function Loading() {return <main className="standalone" aria-busy="true" aria-label="Loading workspace"><div className="loading-card"><span className="eyebrow">PROJECTOS</span><h1>Opening your workspace</h1><p role="status">Loading the frontend preview…</p><div className="skeleton"/><div className="skeleton short"/></div></main>;}
